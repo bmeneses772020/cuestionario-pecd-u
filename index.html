@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuestionario PECD-U Bolivia</title>
+<style>
+:root{
+  --bg:#f4f6f9; --card:#ffffff; --ink:#1c2433; --muted:#5d6779; --line:#dde2ea;
+  --accent:#1f4e79; --accent-soft:#e6eef7; --danger:#9b2c2c;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e141e; --card:#161e2c; --ink:#e7ebf2; --muted:#9aa5b8; --line:#2a3548;
+    --accent:#8fb8e6; --accent-soft:#1b2a40; --danger:#f0a3a3;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e141e; --card:#161e2c; --ink:#e7ebf2; --muted:#9aa5b8; --line:#2a3548;
+  --accent:#8fb8e6; --accent-soft:#1b2a40; --danger:#f0a3a3;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+.hero{background:var(--card);border:1px solid var(--line);border-top:6px solid var(--accent);border-radius:14px;padding:28px 28px 22px;margin-bottom:18px}
+.kicker{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0}
+h1{font-size:1.6rem;line-height:1.25;margin:.4rem 0 .8rem}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.meta li{font-size:.82rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.badge{display:inline-block;font-size:.78rem;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:3px 9px;margin-top:12px}
+.progress{position:sticky;top:0;z-index:10;background:var(--bg);padding:10px 0 12px;margin-bottom:6px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.pinfo{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-top:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 22px 10px;margin-bottom:16px}
+.card h2{font-size:1.12rem;margin:0 0 8px;color:var(--accent)}
+.card p{margin:0 0 12px}
+.intro{color:var(--muted);font-size:.93rem}
+.q{padding:14px 0}
+.q+.q{border-top:1px solid var(--line)}
+.qt{font-weight:500}
+.qn{color:var(--accent);font-weight:700;margin-right:2px}
+.hint{font-size:.85rem;color:var(--muted);margin-top:2px}
+.scale{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));gap:6px;margin-top:10px}
+.choice{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+label.opt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;border:1px solid var(--line);border-radius:10px;padding:9px 6px;font-size:.84rem;line-height:1.3;color:var(--ink);cursor:pointer;background:var(--card);min-height:44px;transition:background .15s,border-color .15s}
+label.opt:hover{border-color:var(--accent)}
+label.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+label.opt input{accent-color:var(--accent);width:18px;height:18px;margin:0}
+.choice label.opt{flex-direction:row;justify-content:flex-start;text-align:left;padding:8px 14px}
+.endpoints{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:10px}
+.row{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:0}
+.row .rl{font-size:.95rem}
+.row .scale,.row .choice{margin-top:4px}
+input[type=text],input[type=number],textarea{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+input[type=number]{max-width:180px}
+input.spec{margin-top:8px}
+input:focus,textarea:focus,label.opt:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+textarea{resize:vertical}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 0 6px;border-top:1px solid var(--line);margin-top:8px}
+.muted{color:var(--muted);font-size:.88rem}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:12px 22px;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn:hover{filter:brightness(1.08)}
+.note{font-size:.9rem;background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin:0 0 12px}
+.legend{font-size:.88rem;color:var(--muted);margin:0 0 4px}
+.foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:24px}
+@media (min-width:700px){
+  .row{flex-direction:row;align-items:center;gap:16px}
+  .row .rl{flex:0 0 250px}
+  .row .scale,.row .choice{margin-top:0;flex:1}
+  .row .choice{justify-content:flex-end}
+}
+@media (max-width:640px){
+  .wrap{padding:16px 14px 48px}
+  .hero{padding:20px 18px 16px}
+  h1{font-size:1.35rem}
+  .card{padding:18px 16px 8px}
+  .scale{grid-template-columns:1fr}
+  label.opt{flex-direction:row;justify-content:flex-start;text-align:left;padding:10px 12px}
+  .endpoints{font-size:.76rem}
+  .choice{flex-direction:column;align-items:stretch}
+  .choice label.opt{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="kicker">PECD-U Bolivia · Versión 1.0</p>
+    <h1>Cuestionario de Percepción del Estado Constitucional de Derecho en Universitarios Bolivianos</h1>
+    <ul class="meta">
+      <li>Duración: 12 a 15 minutos</li>
+      <li>Anónimo y voluntario</li>
+      <li>Autoadministrado</li>
+      <li>Estudiantes de pregrado y posgrado, 18 años o más</li>
+    </ul>
+    <span class="badge">Versión para validación por panel de expertos y prueba piloto</span>
+  </header>
+
+  <div class="progress" aria-live="polite">
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Avance del cuestionario"><i id="fill"></i></div>
+    <div class="pinfo"><span id="ptxt">Respondidas 0 de 60 preguntas</span><span id="pperc">0 %</span></div>
+  </div>
+
+  <form id="pecd" novalidate autocomplete="off">
+
+    <!-- Bloque 0: consentimiento -->
+    <section class="card" id="consent">
+      <h2>Consentimiento informado</h2>
+      <p>Usted ha sido invitado a participar en un estudio académico sobre la percepción del Estado Constitucional de Derecho en estudiantes universitarios de Bolivia. El objetivo es conocer su opinión y su nivel de conocimiento sobre la Constitución Política del Estado, el Tribunal Constitucional Plurinacional, las acciones de defensa de derechos y el pluralismo jurídico.</p>
+      <p>Su participación es voluntaria y anónima. No se solicitará su nombre, cédula de identidad ni ningún dato que permita identificarlo. Puede interrumpir el cuestionario en cualquier momento sin consecuencia alguna y omitir cualquier pregunta que no desee responder. Sus respuestas se almacenarán de forma cifrada, se analizarán únicamente de manera agregada y se publicarán en una base de datos anonimizada de acceso abierto. Responder el cuestionario toma entre 12 y 15 minutos. No existen riesgos previsibles asociados a su participación ni compensación económica por ella.</p>
+      <p>Este estudio cuenta con la aprobación del comité de ética de la institución responsable. Para consultas puede escribir a la dirección de contacto del equipo de investigación.</p>
+      <div class="q">
+        <div class="qt"><span class="qn">¿Acepta participar en este estudio en las condiciones descritas?</span></div>
+        <div class="choice" id="consentOpts">
+          <label class="opt"><input type="radio" name="CON" value="Sí"><span>Sí, acepto participar</span></label>
+          <label class="opt"><input type="radio" name="CON" value="No"><span>No acepto participar</span></label>
+        </div>
+      </div>
+    </section>
+
+    <div id="ended" class="card" hidden>
+      <h2>Gracias por su tiempo</h2>
+      <p>Usted ha decidido no participar. El cuestionario finaliza aquí. Agradecemos su tiempo.</p>
+    </div>
+
+    <div id="formbody" hidden>
+      <div id="questions"></div>
+
+      <section class="card">
+        <div class="actions">
+          <span class="muted">Revise sus respuestas antes de enviar. Puede dejar sin responder cualquier pregunta.</span>
+          <button class="btn" type="submit">Enviar cuestionario</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="thanks" class="card" hidden>
+      <h2>Hemos llegado al final del cuestionario</h2>
+      <p>Agradecemos su tiempo y su disposición a contribuir con este estudio. Los resultados agregados se publicarán en acceso abierto y estarán disponibles para la comunidad universitaria.</p>
+      <p id="saveMsg" class="muted"></p>
+      <div class="actions">
+        <span class="muted">Puede descargar una copia de sus respuestas en formato CSV.</span>
+        <button class="btn ghost" type="button" id="dl">Descargar copia (CSV)</button>
+      </div>
+    </div>
+  </form>
+
+  <p class="foot">PECD-U Bolivia · Versión 1.0 · Documento de trabajo para validación</p>
+</div>
+
+<script>
+const LIK = ['Totalmente en desacuerdo','En desacuerdo','Ni de acuerdo ni en desacuerdo','De acuerdo','Totalmente de acuerdo'];
+const CONOC = ['Nada','Poco','Algo','Bastante','Mucho'];
+
+const BLOQUES = [
+  { t:'Bloque A: Datos sociodemográficos', items:[
+    {c:'D1', t:'Universidad en la que está matriculado', k:'text'},
+    {c:'D2', t:'Tipo de institución', k:'choice', s:['Pública','Privada','Régimen especial']},
+    {c:'D3', t:'Carrera o programa que cursa', k:'text'},
+    {c:'D4', t:'Nivel de estudios', k:'choice', s:['Pregrado','Posgrado (especialidad, maestría o doctorado)']},
+    {c:'D5', t:'Año o semestre que cursa actualmente', k:'text'},
+    {c:'D6', t:'Edad en años cumplidos', k:'number', hint:'Población objetivo: estudiantes de 18 años o más.'},
+    {c:'D7', t:'Sexo o identidad de género', k:'choice', s:['Mujer','Hombre','Otra identidad','Prefiero no responder']},
+    {c:'D8', t:'Ciudad en la que reside habitualmente', k:'text'},
+    {c:'D9', t:'Lengua materna', k:'choice', s:['Castellano','Quechua','Aymara','Guaraní','Otra lengua indígena (especifique)','Otra (especifique)'], spec:[4,5]},
+    {c:'D10', t:'¿Se autoidentifica como perteneciente a alguna nación o pueblo indígena originario campesino?', k:'choice', s:['Sí (especifique)','No','Prefiero no responder'], spec:[0]}
+  ]},
+  { t:'Dimensión I: Legitimidad de la Constitución Política del Estado', intro:'En cada ítem, marque la opción que mejor describa su posición.', items:[
+    {c:'P1', t:'El Órgano Ejecutivo cumple lo que establece la Constitución Política del Estado.', k:'scale', s:LIK},
+    {c:'P2', t:'La Asamblea Legislativa Plurinacional legisla respetando la Constitución.', k:'scale', s:LIK},
+    {c:'P3', t:'Los órganos judiciales resuelven conforme a la Constitución y no según intereses políticos.', k:'scale', s:LIK},
+    {c:'P4', t:'Las políticas públicas que se aplican en Bolivia son coherentes con la Constitución de 2009.', k:'scale', s:LIK},
+    {c:'P5', t:'En mi vida cotidiana percibo que la Constitución tiene efectos concretos.', k:'scale', s:LIK},
+    {c:'P6', t:'Las autoridades invocan la Constitución para justificar decisiones ya tomadas, más que para orientar sus actos.', k:'scale', s:LIK}
+  ]},
+  { t:'Dimensión II: Confianza y credibilidad del Tribunal Constitucional Plurinacional', items:[
+    {c:'P7', t:'¿Cuánto conoce usted las funciones del Tribunal Constitucional Plurinacional (TCP)?', k:'scale', s:CONOC},
+    {c:'P8', t:'¿Cuánta confianza tiene en el Tribunal Constitucional Plurinacional?', k:'scale', s:['Ninguna','Poca','Algo','Bastante','Mucha']},
+    {c:'P9', t:'El TCP actúa con independencia frente al Órgano Ejecutivo.', k:'scale', s:LIK},
+    {c:'P10', t:'El TCP protege eficazmente los derechos fundamentales de las personas.', k:'scale', s:LIK},
+    {c:'P11', t:'El proceso de preselección en la Asamblea Legislativa Plurinacional y la elección popular de magistrados garantizan la independencia del TCP.', k:'scale', s:LIK},
+    {c:'C3', t:'El TCP resuelve influido por el poder político.', k:'scale', s:LIK}
+  ]},
+  { t:'Dimensión III: Acceso a la justicia constitucional', items:[
+    {c:'P12', t:'Indique si conoce cada una de las siguientes acciones de defensa reconocidas por la Constitución.', k:'yn', rows:['Acción de libertad','Acción de amparo constitucional','Acción popular','Acción de cumplimiento','Acción de protección de privacidad','Acción de inconstitucionalidad'], s:['Sí','No']},
+    {c:'P13', t:'Una persona común puede acceder a la justicia constitucional sin necesidad de contactos políticos.', k:'scale', s:LIK},
+    {c:'P14', t:'Los costos económicos son un obstáculo para presentar una acción constitucional.', k:'scale', s:LIK},
+    {c:'P15', t:'La discriminación por origen, lengua o condición social limita el acceso a la justicia constitucional.', k:'scale', s:LIK},
+    {c:'C1', t:'Control de atención. Para verificar que está leyendo con atención, marque la opción «En desacuerdo» en este ítem.', k:'scale', s:LIK},
+    {c:'P16', t:'¿Usted, un familiar o un conocido ha presentado alguna acción constitucional?', k:'choice', s:['Sí, yo','Sí, un familiar o conocido','No','No sé']}
+  ]},
+  { t:'Dimensión IV: Pluralismo jurídico e interculturalidad constitucional', items:[
+    {c:'P17', t:'¿Cuánto conoce la Jurisdicción Indígena Originaria Campesina (JIOC)?', k:'scale', s:CONOC},
+    {c:'P18', t:'La JIOC tiene la misma jerarquía que la jurisdicción ordinaria, tal como establece la Constitución.', k:'scale', s:LIK},
+    {c:'P19', t:'En la práctica, las decisiones de la JIOC son respetadas por la jurisdicción ordinaria.', k:'scale', s:LIK},
+    {c:'P20', t:'La coexistencia de varias jurisdicciones genera inseguridad jurídica.', k:'scale', s:LIK},
+    {c:'P21', t:'El pluralismo jurídico igualitario fortalece el Estado de derecho en Bolivia.', k:'scale', s:LIK},
+    {c:'P22', t:'El reconocimiento constitucional del pluralismo jurídico no se refleja en el funcionamiento real del sistema judicial.', k:'scale', s:LIK}
+  ]},
+  { t:'Dimensión V: Derechos fundamentales y garantías constitucionales', items:[
+    {c:'P23', t:'Indique en qué medida cada derecho se cumple efectivamente para los estudiantes universitarios en Bolivia.', k:'num', e:['1 = No se cumple','5 = Se cumple plenamente'], rows:['Educación','Salud','Trabajo','Libertad de expresión','Protección de la privacidad','Libertad de reunión y asociación'], s:['1','2','3','4','5']},
+    {c:'P24', t:'El Estado protege eficazmente mis derechos fundamentales.', k:'scale', s:LIK},
+    {c:'P25', t:'Si mis derechos fueran vulnerados, sabría qué mecanismo constitucional utilizar.', k:'scale', s:LIK},
+    {c:'P26', t:'En el ámbito universitario se respetan la libertad de expresión y el derecho a la organización estudiantil.', k:'scale', s:LIK},
+    {c:'P27', t:'¿Con qué frecuencia ha presenciado o vivido una vulneración de derechos que no fue reparada por ninguna instancia?', k:'scale', s:['Nunca','Rara vez','Algunas veces','Con frecuencia','Muy frecuentemente']},
+    {c:'C2', t:'Cumplo siempre todas las normas, sin excepción alguna.', k:'scale', s:LIK}
+  ]},
+  { t:'Dimensión VI: Separación de poderes y control constitucional', items:[
+    {c:'P28', t:'El Órgano Ejecutivo interfiere en las decisiones del Órgano Judicial.', k:'scale', s:LIK},
+    {c:'P29', t:'La Asamblea Legislativa Plurinacional ejerce un control efectivo sobre el Órgano Ejecutivo.', k:'scale', s:LIK},
+    {c:'P30', t:'El Órgano Electoral Plurinacional actúa con imparcialidad.', k:'scale', s:LIK},
+    {c:'P31', t:'Existe un equilibrio real de poder entre los cuatro órganos del Estado.', k:'scale', s:LIK},
+    {c:'P32', t:'Las decisiones judiciales de alto impacto político responden a presiones externas al derecho.', k:'scale', s:LIK}
+  ]},
+  { t:'Dimensión VII: Derechos colectivos y Estado Plurinacional', items:[
+    {c:'P33', t:'La consulta previa, libre e informada a los pueblos indígenas se aplica como un trámite formal para validar proyectos estatales ya decididos.', k:'scale', s:LIK},
+    {c:'P34', t:'Los derechos colectivos de las naciones y pueblos indígena originario campesinos tienen el mismo nivel de protección que los derechos individuales.', k:'scale', s:LIK},
+    {c:'P35', t:'El carácter plurinacional del Estado se refleja en el funcionamiento de las instituciones públicas.', k:'scale', s:LIK},
+    {c:'P36', t:'La autodeterminación de los pueblos indígenas se respeta incluso cuando entra en conflicto con los intereses del gobierno central.', k:'scale', s:LIK},
+    {c:'P37', t:'Mi autoidentificación cultural influye en el acceso efectivo a mis derechos constitucionales.', k:'scale', s:LIK}
+  ]},
+  { t:'Dimensión VIII: Alfabetización constitucional y formación universitaria', items:[
+    {c:'P38', t:'¿Cómo calificaría su nivel de conocimiento de la Constitución Política del Estado?', k:'scale', s:['Nulo','Bajo','Medio','Alto','Muy alto']},
+    {c:'P39', t:'¿Cuáles de los siguientes son principios reconocidos por la Constitución de 2009? (Marque todos los que correspondan.)', k:'multi', s:['Pluralismo jurídico igualitario','Supremacía constitucional','Libre determinación de las naciones y pueblos indígena originario campesinos','Unidad de jurisdicción penal militar','Bloque de constitucionalidad','Subordinación de la justicia indígena a la justicia ordinaria']},
+    {c:'P40', t:'Mi formación universitaria me ha brindado herramientas para identificar cuándo las autoridades actúan al margen de la Constitución.', k:'scale', s:LIK},
+    {c:'P41', t:'La universidad debería incluir formación constitucional obligatoria en todas las carreras.', k:'scale', s:LIK},
+    {c:'P42', t:'He utilizado argumentos o normas constitucionales en trabajos académicos o en la defensa de un derecho.', k:'scale', s:LIK},
+    {c:'P43', t:'La universidad me ha enseñado a diferenciar entre lo que establece la Constitución y su cumplimiento real en la sociedad.', k:'scale', s:LIK},
+    {c:'C4', t:'¿Con qué grado de sinceridad respondió este cuestionario?', k:'scale', s:['Muy poco sincero','Poco sincero','Medianamente sincero','Sincero','Completamente sincero']}
+  ]},
+  { t:'Bloque D: Preguntas abiertas de cierre', intro:'Puede responder con sus propias palabras. Esta sección es opcional.', items:[
+    {c:'A1', t:'¿Qué haría falta para que la Constitución de 2009 se cumpla efectivamente en Bolivia?', k:'textarea'},
+    {c:'A2', t:'Describa brevemente una situación en la que usted o alguien cercano necesitó protección constitucional. ¿Qué ocurrió?', k:'textarea'},
+    {c:'A3', t:'¿Qué papel debería cumplir la universidad frente a la crisis de credibilidad de la justicia constitucional?', k:'textarea'}
+  ]}
+];
+
+const $ = (s, r=document) => r.querySelector(s);
+function h(tag, attrs={}, ...kids){
+  const e = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs)){
+    if (v === undefined || v === null || v === false) continue;
+    if (k === 'class') e.className = v; else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()){
+    if (k === null || k === undefined || k === false) continue;
+    e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  }
+  return e;
+}
+function opt(name, type, value, label){
+  return h('label', {class:'opt'}, h('input', {type, name, value}), h('span', {}, label));
+}
+
+function renderQ(it, n){
+  const q = h('div', {class:'q', 'data-code': it.c});
+  q.append(h('div', {class:'qt'}, h('span', {class:'qn'}, n + '.'), ' ', it.t));
+  if (it.hint) q.append(h('div', {class:'hint'}, it.hint));
+
+  switch (it.k){
+    case 'scale': {
+      const c = h('div', {class:'scale', style:`--n:${it.s.length}`});
+      it.s.forEach((l,i) => c.append(opt(it.c, 'radio', i+1, l)));
+      q.append(c); break;
+    }
+    case 'choice': {
+      const c = h('div', {class:'choice'});
+      it.s.forEach(l => c.append(opt(it.c, 'radio', l, l)));
+      q.append(c);
+      (it.spec || []).forEach(i => q.append(h('input', {type:'text', class:'spec', name:`${it.c}_esp${i+1}`, placeholder:'Especifique', hidden:true, 'data-idx':i, 'aria-label':`Especifique: ${it.s[i]}`})));
+      break;
+    }
+    case 'multi': {
+      const c = h('div', {class:'choice'});
+      it.s.forEach(l => c.append(opt(it.c, 'checkbox', l, l)));
+      q.append(c); break;
+    }
+    case 'yn': {
+      it.rows.forEach((r,i) => {
+        const code = it.c + String.fromCharCode(97+i);
+        const c = h('div', {class:'choice'});
+        it.s.forEach(l => c.append(opt(code, 'radio', l, l)));
+        q.append(h('div', {class:'row'}, h('div', {class:'rl'}, r), c));
+      });
+      break;
+    }
+    case 'num': {
+      q.append(h('div', {class:'endpoints'}, h('span', {}, it.e[0]), h('span', {}, it.e[1])));
+      it.rows.forEach((r,i) => {
+        const code = it.c + String.fromCharCode(97+i);
+        const c = h('div', {class:'scale', style:`--n:${it.s.length}`});
+        it.s.forEach(l => c.append(opt(code, 'radio', l, l)));
+        q.append(h('div', {class:'row'}, h('div', {class:'rl'}, r), c));
+      });
+      break;
+    }
+    case 'text':
+      q.append(h('input', {type:'text', name:it.c, 'aria-label':it.t})); break;
+    case 'number':
+      q.append(h('input', {type:'number', name:it.c, min:18, max:120, inputmode:'numeric', 'aria-label':it.t})); break;
+    case 'textarea':
+      q.append(h('textarea', {name:it.c, rows:4, 'aria-label':it.t})); break;
+  }
+  return q;
+}
+
+// Render the questionnaire (numbering is sequential for the respondent; codes stay internal)
+let n = 0;
+BLOQUES.forEach(b => {
+  const card = h('section', {class:'card'}, h('h2', {}, b.t));
+  if (b.intro) card.append(h('p', {class:'intro'}, b.intro));
+  b.items.forEach(it => { n++; card.append(renderQ(it, n)); });
+  $('#questions').append(card);
+});
+const TOTAL = n;
+$('#ptxt').textContent = `Respondidas 0 de ${TOTAL} preguntas`;
+
+// Progress: a question counts as answered when every field in it has a value
+function progress(){
+  let done = 0;
+  document.querySelectorAll('#questions .q').forEach(q => {
+    const names = new Set([...q.querySelectorAll('input:not(.spec), textarea')].map(i => i.name));
+    let ok = names.size > 0;
+    names.forEach(name => {
+      const els = q.querySelectorAll(`[name="${name}"]`);
+      const any = [...els].some(el => (el.type === 'radio' || el.type === 'checkbox') ? el.checked : el.value.trim() !== '');
+      if (!any) ok = false;
+    });
+    if (ok) done++;
+  });
+  const pct = Math.round(done / TOTAL * 100);
+  $('#fill').style.width = pct + '%';
+  $('#pecd .bar, .bar').setAttribute('aria-valuenow', pct);
+  $('#ptxt').textContent = `Respondidas ${done} de ${TOTAL} preguntas`;
+  $('#pperc').textContent = pct + ' %';
+}
+
+// Consent gating and spec-field visibility
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.name === 'CON'){
+    const v = document.querySelector('input[name=CON]:checked')?.value;
+    $('#formbody').hidden = v !== 'Sí';
+    $('#ended').hidden = v !== 'No';
+    $('#consent').hidden = v === 'No';
+    $('#thanks').hidden = true;
+    progress();
+    return;
+  }
+  const q = t.closest('.q');
+  if (q){
+    const sel = q.querySelector('.choice input[type=radio]:checked');
+    const radios = [...q.querySelectorAll('.choice input[type=radio]')];
+    q.querySelectorAll('input.spec').forEach(sp => {
+      sp.hidden = !(sel && radios.indexOf(sel) === +sp.dataset.idx);
+    });
+  }
+  progress();
+});
+document.addEventListener('input', progress);
+
+// Build the export: internal codes + answers, no names or identifiers
+function buildCSV(form){
+  const data = new Map();
+  for (const el of form.elements){
+    if (!el.name || el.name === 'CON' || el.disabled) continue;
+    if (el.classList.contains('spec') && el.hidden) continue;
+    if ((el.type === 'radio' || el.type === 'checkbox') && !el.checked) continue;
+    const v = el.value.trim();
+    if (!v) continue;
+    if (!data.has(el.name)) data.set(el.name, []);
+    data.get(el.name).push(v);
+  }
+  const esc = s => '"' + String(s).replace(/"/g, '""') + '"';
+  const rows = [['codigo','respuesta'], ['fecha_envio', new Date().toISOString()], ['consentimiento', 'Sí']];
+  data.forEach((vals, k) => rows.push([k, vals.join('; ')]));
+  return rows.map(r => r.map(esc).join(',')).join('\r\n');
+}
+let lastCSV = '';
+function download(){
+  const blob = new Blob(['﻿' + lastCSV], {type:'text/csv;charset=utf-8'});
+  const a = h('a', {href: URL.createObjectURL(blob), download: 'PECD-U_respuestas_' + Date.now() + '.csv'});
+  document.body.append(a); a.click(); a.remove();
+}
+
+// Answers as a plain object: code -> value (multi-select values joined)
+function answersFrom(form){
+  const out = {};
+  for (const el of form.elements){
+    if (!el.name || el.name === 'CON' || el.disabled) continue;
+    if (el.classList.contains('spec') && el.hidden) continue;
+    if ((el.type === 'radio' || el.type === 'checkbox') && !el.checked) continue;
+    const v = el.value.trim();
+    if (!v) continue;
+    out[el.name] = out[el.name] ? out[el.name] + '; ' + v : v;
+  }
+  return out;
+}
+
+$('#pecd').addEventListener('submit', async e => {
+  e.preventDefault();
+  const con = document.querySelector('input[name=CON]:checked');
+  if (!con || con.value !== 'Sí') return;
+  lastCSV = buildCSV(e.target);
+  $('#formbody').hidden = true;
+  $('#thanks').hidden = false;
+  $('#dl').onclick = download;
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  // Store the response in the artifact's database when the viewer is allowed to write
+  let saved = false;
+  try {
+    const db = await window.claude?.use?.('db');
+    if (db){
+      await db.collection('respuestas').add({
+        enviado: new Date().toISOString(),
+        respuestas: answersFrom(e.target)
+      });
+      saved = true;
+    }
+  } catch (err) {
+    saved = false;
+  }
+  if (saved){
+    $('#saveMsg').textContent = 'Sus respuestas fueron registradas. Gracias por participar.';
+  } else {
+    $('#saveMsg').textContent = 'No fue posible registrar sus respuestas en línea. Descargue la copia en CSV y envíela al equipo de investigación.';
+    download();
+  }
+});
+</script>
+</body>
+</html>
