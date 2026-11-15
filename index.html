@@ -148,10 +148,6 @@ textarea{resize:vertical}
       <h2>Hemos llegado al final del cuestionario</h2>
       <p>Agradecemos su tiempo y su disposición a contribuir con este estudio. Los resultados agregados se publicarán en acceso abierto y estarán disponibles para la comunidad universitaria.</p>
       <p id="saveMsg" class="muted"></p>
-      <div class="actions">
-        <span class="muted">Puede descargar una copia de sus respuestas en formato CSV.</span>
-        <button class="btn ghost" type="button" id="dl">Descargar copia (CSV)</button>
-      </div>
     </div>
   </form>
 
@@ -395,12 +391,6 @@ function buildCSV(form){
   data.forEach((vals, k) => rows.push([k, vals.join('; ')]));
   return rows.map(r => r.map(esc).join(',')).join('\r\n');
 }
-let lastCSV = '';
-function download(){
-  const blob = new Blob(['﻿' + lastCSV], {type:'text/csv;charset=utf-8'});
-  const a = h('a', {href: URL.createObjectURL(blob), download: 'PECD-U_respuestas_' + Date.now() + '.csv'});
-  document.body.append(a); a.click(); a.remove();
-}
 
 // Answers as a plain object: code -> value (multi-select values joined)
 function answersFrom(form){
@@ -434,35 +424,38 @@ $('#pecd').addEventListener('submit', async e => {
   }
   $('#missMsg').hidden = true;
 
-  lastCSV = buildCSV(e.target);
-  $('#formbody').hidden = true;
-  $('#thanks').hidden = false;
-  $('#dl').onclick = download;
-  window.scrollTo({top:0, behavior:'smooth'});
-
-  // Send the response to the Google Sheet through Apps Script
-  let saved = false;
-  if (WEBAPP_URL.startsWith('https://')) {
-    try {
-      // no-cors: Apps Script no devuelve cabeceras CORS; el envío se confirma por la ausencia de error de red
-      await fetch(WEBAPP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({ enviado: new Date().toISOString(), respuestas: answersFrom(e.target) })
-      });
-      saved = true;
-    } catch (err) {
-      saved = false;
-    }
+  // Enviar a Google Sheets (Apps Script). No se descarga ningún archivo.
+  if (!WEBAPP_URL.startsWith('https://')) {
+    mostrarError('El formulario aún no está conectado a la hoja de cálculo. Avise al equipo de investigación.');
+    return;
   }
-  if (saved){
+  const boton = e.target.querySelector('button[type=submit]');
+  boton.disabled = true;
+  try {
+    // no-cors: Apps Script no devuelve cabeceras CORS; solo se detectan errores de red
+    await fetch(WEBAPP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ enviado: new Date().toISOString(), respuestas: answersFrom(e.target) })
+    });
+    $('#formbody').hidden = true;
+    $('#thanks').hidden = false;
     $('#saveMsg').textContent = 'Sus respuestas fueron registradas. Gracias por participar.';
-  } else {
-    $('#saveMsg').textContent = 'No fue posible registrar sus respuestas en línea. Descargue la copia en CSV y envíela al equipo de investigación.';
-    download();
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch (err) {
+    mostrarError('No fue posible enviar sus respuestas. Revise su conexión e intente de nuevo.');
+  } finally {
+    boton.disabled = false;
   }
 });
+
+function mostrarError(texto){
+  const m = $('#missMsg');
+  m.textContent = texto;
+  m.hidden = false;
+  m.scrollIntoView({behavior:'smooth', block:'center'});
+}
 </script>
 </body>
 </html>
