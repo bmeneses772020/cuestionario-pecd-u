@@ -154,6 +154,9 @@ textarea{resize:vertical}
 </div>
 
 <script>
+// URL de la aplicación web de Apps Script (Implementar > Nueva implementación > Aplicación web)
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw0NasitKf7dKf0tryrR-darYUXvc9NXXVUPXb_kJ54bIFQxuKOGH4odjRFtxqG9bzV/exec';
+
 const LIK = ['Totalmente en desacuerdo','En desacuerdo','Ni de acuerdo ni en desacuerdo','De acuerdo','Totalmente de acuerdo'];
 const CONOC = ['Nada','Poco','Algo','Bastante','Mucho'];
 
@@ -412,19 +415,21 @@ $('#pecd').addEventListener('submit', async e => {
   $('#dl').onclick = download;
   window.scrollTo({top:0, behavior:'smooth'});
 
-  // Store the response in the artifact's database when the viewer is allowed to write
+  // Send the response to the Google Sheet through Apps Script
   let saved = false;
-  try {
-    const db = await window.claude?.use?.('db');
-    if (db){
-      await db.collection('respuestas').add({
-        enviado: new Date().toISOString(),
-        respuestas: answersFrom(e.target)
+  if (WEBAPP_URL.startsWith('https://')) {
+    try {
+      // no-cors: Apps Script no devuelve cabeceras CORS; el envío se confirma por la ausencia de error de red
+      await fetch(WEBAPP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ enviado: new Date().toISOString(), respuestas: answersFrom(e.target) })
       });
       saved = true;
+    } catch (err) {
+      saved = false;
     }
-  } catch (err) {
-    saved = false;
   }
   if (saved){
     $('#saveMsg').textContent = 'Sus respuestas fueron registradas. Gracias por participar.';
