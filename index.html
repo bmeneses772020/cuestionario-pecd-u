@@ -66,6 +66,9 @@ textarea{resize:vertical}
 .btn:hover{filter:brightness(1.08)}
 .note{font-size:.9rem;background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin:0 0 12px}
 .legend{font-size:.88rem;color:var(--muted);margin:0 0 4px}
+.req{color:var(--danger);font-weight:700}
+.alert{color:var(--danger);border:1px solid var(--danger);border-radius:10px;padding:10px 14px;font-size:.92rem;margin:0 0 12px}
+.q.missing{background:linear-gradient(90deg,transparent,transparent);box-shadow:inset 3px 0 0 var(--danger);padding-left:12px}
 .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:24px}
 @media (min-width:700px){
   .row{flex-direction:row;align-items:center;gap:16px}
@@ -112,7 +115,7 @@ textarea{resize:vertical}
     <section class="card" id="consent">
       <h2>Consentimiento informado</h2>
       <p>Usted ha sido invitado a participar en un estudio académico sobre la percepción del Estado Constitucional de Derecho en estudiantes universitarios de Bolivia. El objetivo es conocer su opinión y su nivel de conocimiento sobre la Constitución Política del Estado, el Tribunal Constitucional Plurinacional, las acciones de defensa de derechos y el pluralismo jurídico.</p>
-      <p>Su participación es voluntaria y anónima. No se solicitará su nombre, cédula de identidad ni ningún dato que permita identificarlo. Puede interrumpir el cuestionario en cualquier momento sin consecuencia alguna y omitir cualquier pregunta que no desee responder. Sus respuestas se almacenarán de forma cifrada, se analizarán únicamente de manera agregada y se publicarán en una base de datos anonimizada de acceso abierto. Responder el cuestionario toma entre 12 y 15 minutos. No existen riesgos previsibles asociados a su participación ni compensación económica por ella.</p>
+      <p>Su participación es voluntaria y anónima. No se solicitará su nombre, cédula de identidad ni ningún dato que permita identificarlo. Puede interrumpir el cuestionario en cualquier momento sin consecuencia alguna. Para enviar el cuestionario, todas las preguntas deben responderse. Sus respuestas se almacenarán de forma cifrada, se analizarán únicamente de manera agregada y se publicarán en una base de datos anonimizada de acceso abierto. Responder el cuestionario toma entre 12 y 15 minutos. No existen riesgos previsibles asociados a su participación ni compensación económica por ella.</p>
       <p>Este estudio cuenta con la aprobación del comité de ética de la institución responsable. Para consultas puede escribir a la dirección de contacto del equipo de investigación.</p>
       <div class="q">
         <div class="qt"><span class="qn">¿Acepta participar en este estudio en las condiciones descritas?</span></div>
@@ -129,11 +132,13 @@ textarea{resize:vertical}
     </div>
 
     <div id="formbody" hidden>
+      <p class="legend">Todas las preguntas son obligatorias (<span class="req">*</span>).</p>
+      <p id="missMsg" class="alert" hidden></p>
       <div id="questions"></div>
 
       <section class="card">
         <div class="actions">
-          <span class="muted">Revise sus respuestas antes de enviar. Puede dejar sin responder cualquier pregunta.</span>
+          <span class="muted">Revise sus respuestas antes de enviar. Todas las preguntas son obligatorias.</span>
           <button class="btn" type="submit">Enviar cuestionario</button>
         </div>
       </section>
@@ -155,7 +160,7 @@ textarea{resize:vertical}
 
 <script>
 // URL de la aplicación web de Apps Script (Implementar > Nueva implementación > Aplicación web)
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw0NasitKf7dKf0tryrR-darYUXvc9NXXVUPXb_kJ54bIFQxuKOGH4odjRFtxqG9bzV/exec';
+const WEBAPP_URL = 'PEGA_AQUI_LA_URL_DE_APPS_SCRIPT';
 
 const LIK = ['Totalmente en desacuerdo','En desacuerdo','Ni de acuerdo ni en desacuerdo','De acuerdo','Totalmente de acuerdo'];
 const CONOC = ['Nada','Poco','Algo','Bastante','Mucho'];
@@ -236,7 +241,7 @@ const BLOQUES = [
     {c:'P43', t:'La universidad me ha enseñado a diferenciar entre lo que establece la Constitución y su cumplimiento real en la sociedad.', k:'scale', s:LIK},
     {c:'C4', t:'¿Con qué grado de sinceridad respondió este cuestionario?', k:'scale', s:['Muy poco sincero','Poco sincero','Medianamente sincero','Sincero','Completamente sincero']}
   ]},
-  { t:'Bloque D: Preguntas abiertas de cierre', intro:'Puede responder con sus propias palabras. Esta sección es opcional.', items:[
+  { t:'Bloque D: Preguntas abiertas de cierre', intro:'Responda con sus propias palabras.', items:[
     {c:'A1', t:'¿Qué haría falta para que la Constitución de 2009 se cumpla efectivamente en Bolivia?', k:'textarea'},
     {c:'A2', t:'Describa brevemente una situación en la que usted o alguien cercano necesitó protección constitucional. ¿Qué ocurrió?', k:'textarea'},
     {c:'A3', t:'¿Qué papel debería cumplir la universidad frente a la crisis de credibilidad de la justicia constitucional?', k:'textarea'}
@@ -262,7 +267,7 @@ function opt(name, type, value, label){
 
 function renderQ(it, n){
   const q = h('div', {class:'q', 'data-code': it.c});
-  q.append(h('div', {class:'qt'}, h('span', {class:'qn'}, n + '.'), ' ', it.t));
+  q.append(h('div', {class:'qt'}, h('span', {class:'qn'}, n + '.'), ' ', it.t, h('span', {class:'req', title:'Obligatoria'}, ' *')));
   if (it.hint) q.append(h('div', {class:'hint'}, it.hint));
 
   switch (it.k){
@@ -323,18 +328,24 @@ BLOQUES.forEach(b => {
 const TOTAL = n;
 $('#ptxt').textContent = `Respondidas 0 de ${TOTAL} preguntas`;
 
-// Progress: a question counts as answered when every field in it has a value
+// A question is answered when every field in it has a value; a visible "especifique" box must be filled too
+function qAnswered(q){
+  const names = new Set([...q.querySelectorAll('input:not(.spec), textarea')].map(i => i.name));
+  let ok = names.size > 0;
+  names.forEach(name => {
+    const els = q.querySelectorAll(`[name="${name}"]`);
+    const any = [...els].some(el => (el.type === 'radio' || el.type === 'checkbox') ? el.checked : el.value.trim() !== '');
+    if (!any) ok = false;
+  });
+  q.querySelectorAll('input.spec:not([hidden])').forEach(sp => { if (!sp.value.trim()) ok = false; });
+  return ok;
+}
+
+// Progress: counts answered questions
 function progress(){
   let done = 0;
   document.querySelectorAll('#questions .q').forEach(q => {
-    const names = new Set([...q.querySelectorAll('input:not(.spec), textarea')].map(i => i.name));
-    let ok = names.size > 0;
-    names.forEach(name => {
-      const els = q.querySelectorAll(`[name="${name}"]`);
-      const any = [...els].some(el => (el.type === 'radio' || el.type === 'checkbox') ? el.checked : el.value.trim() !== '');
-      if (!any) ok = false;
-    });
-    if (ok) done++;
+    if (qAnswered(q)) { done++; q.classList.remove('missing'); }
   });
   const pct = Math.round(done / TOTAL * 100);
   $('#fill').style.width = pct + '%';
@@ -409,6 +420,20 @@ $('#pecd').addEventListener('submit', async e => {
   e.preventDefault();
   const con = document.querySelector('input[name=CON]:checked');
   if (!con || con.value !== 'Sí') return;
+
+  // Todas las preguntas son obligatorias: no se envía con respuestas pendientes
+  const pendientes = [...document.querySelectorAll('#questions .q')].filter(q => !qAnswered(q));
+  if (pendientes.length){
+    document.querySelectorAll('.q.missing').forEach(q => q.classList.remove('missing'));
+    pendientes.forEach(q => q.classList.add('missing'));
+    const m = $('#missMsg');
+    m.textContent = `Faltan ${pendientes.length} pregunta(s) por responder. Las marcadas en rojo son obligatorias.`;
+    m.hidden = false;
+    pendientes[0].scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  $('#missMsg').hidden = true;
+
   lastCSV = buildCSV(e.target);
   $('#formbody').hidden = true;
   $('#thanks').hidden = false;
