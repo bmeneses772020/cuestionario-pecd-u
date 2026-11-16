@@ -147,13 +147,14 @@ textarea{resize:vertical}
     </div>
 
     <div id="thanks" class="card" hidden>
-      <h2>Hemos llegado al final del cuestionario</h2>
-      <p>Agradecemos su tiempo y su disposición a contribuir con este estudio. Los resultados agregados se publicarán en acceso abierto y estarán disponibles para la comunidad universitaria.</p>
-      <p id="saveMsg" class="muted"></p>
+      <h2>¡Gracias por participar!</h2>
+      <p>Sus respuestas fueron registradas correctamente.</p>
+      <p>Agradecemos su tiempo y su disposición a contribuir con este estudio.</p>
+      <p class="muted">Ya puede cerrar esta página.</p>
     </div>
   </form>
 
-  <p class="foot">PECD-U Bolivia · Versión 1.0 · Documento de trabajo para validación</p>
+  <p class="foot">PECD-U Bolivia · Versión 1.0</p>
 </div>
 
 <script>
@@ -448,8 +449,9 @@ $('#pecd').addEventListener('submit', async e => {
       body: JSON.stringify({ enviado: new Date().toISOString(), respuestas: answersFrom(e.target) })
     });
     $('#formbody').hidden = true;
+    $('#consent').hidden = true;
+    $('#ended').hidden = true;
     $('#thanks').hidden = false;
-    $('#saveMsg').textContent = 'Sus respuestas fueron registradas. Gracias por participar.';
     window.scrollTo({top:0, behavior:'smooth'});
   } catch (err) {
     mostrarError('No fue posible enviar sus respuestas. Revise su conexión e intente de nuevo.');
