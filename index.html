@@ -54,7 +54,9 @@ label.opt input{accent-color:var(--accent);width:18px;height:18px;margin:0}
 .row:last-child{border-bottom:0}
 .row .rl{font-size:.95rem}
 .row .scale,.row .choice{margin-top:4px}
-input[type=text],input[type=number],textarea{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.scale5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:4px}
+.scale5 label.opt{min-height:44px;padding:8px 4px}
+input[type=text],input[type=number],textarea,select{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
 input[type=number]{max-width:180px}
 input.spec{margin-top:8px}
 input:focus,textarea:focus,label.opt:focus-within{outline:2px solid var(--accent);outline-offset:1px}
@@ -74,6 +76,7 @@ textarea{resize:vertical}
   .row{flex-direction:row;align-items:center;gap:16px}
   .row .rl{flex:0 0 250px}
   .row .scale,.row .choice{margin-top:0;flex:1}
+  .row .scale5{margin-top:0;flex:1 1 auto;max-width:560px}
   .row .choice{justify-content:flex-end}
 }
 @media (max-width:640px){
@@ -101,7 +104,6 @@ textarea{resize:vertical}
       <li>Autoadministrado</li>
       <li>Estudiantes de pregrado y posgrado, 18 años o más</li>
     </ul>
-    <span class="badge">Versión para validación por panel de expertos y prueba piloto</span>
   </header>
 
   <div class="progress" aria-live="polite">
@@ -114,9 +116,9 @@ textarea{resize:vertical}
     <!-- Bloque 0: consentimiento -->
     <section class="card" id="consent">
       <h2>Consentimiento informado</h2>
-      <p>Usted ha sido invitado a participar en un estudio académico sobre la percepción del Estado Constitucional de Derecho en estudiantes universitarios de Bolivia. El objetivo es conocer su opinión y su nivel de conocimiento sobre la Constitución Política del Estado, el Tribunal Constitucional Plurinacional, las acciones de defensa de derechos y el pluralismo jurídico.</p>
-      <p>Su participación es voluntaria y anónima. No se solicitará su nombre, cédula de identidad ni ningún dato que permita identificarlo. Para enviar el cuestionario, todas las preguntas deben responderse. Sus respuestas se almacenarán de forma cifrada, se analizarán únicamente de manera agregada y se publicarán en una base de datos anonimizada de acceso abierto. Responder el cuestionario toma entre 12 y 15 minutos. No existen riesgos previsibles asociados a su participación ni compensación económica por ella.</p>
-      <p>Este estudio cuenta con la aprobación del comité de ética de la institución responsable. Para consultas puede escribir a la dirección de contacto del equipo de investigación.</p>
+      <p>Se le invita a participar voluntariamente en un estudio académico cuyo propósito es analizar la percepción del Estado Constitucional de Derecho en estudiantes universitarios de Bolivia. La investigación busca conocer sus opiniones y nivel de conocimiento sobre la Constitución Política del Estado, el Tribunal Constitucional Plurinacional, las acciones de defensa de derechos y el pluralismo jurídico.</p>
+      <p>Su participación es voluntaria y anónima. No se solicitarán nombres, números de cédula de identidad ni otros datos que permitan identificarlo. Completar el cuestionario le tomará aproximadamente entre 12 y 15 minutos. Para enviar el cuestionario, todas las preguntas deben responderse.</p>
+      <p>El estudio cuenta con la aprobación del comité de ética de la institución responsable. Si tiene alguna consulta, puede comunicarse con el equipo de investigación a través de la dirección de contacto proporcionada.</p>
       <div class="q">
         <div class="qt"><span class="qn">¿Acepta participar en este estudio en las condiciones descritas?</span></div>
         <div class="choice" id="consentOpts">
@@ -156,19 +158,19 @@ textarea{resize:vertical}
 
 <script>
 // URL de la aplicación web de Apps Script (Implementar > Nueva implementación > Aplicación web)
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxFNUUi5Fx01EGJu56_ooFtpn4Q9mfyT2mHCzZviWHHNwtWLkidicXAA8Vk0fzioa8v/exec';
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbx3K22SY16-RVy9ifslDU7l3uo1ZvnUdaiaUclJj93JyOYfCOsy0_IQKzciHh3_hJYS/exec';
 
 const LIK = ['Totalmente en desacuerdo','En desacuerdo','Ni de acuerdo ni en desacuerdo','De acuerdo','Totalmente de acuerdo'];
 const CONOC = ['Nada','Poco','Algo','Bastante','Mucho'];
 
 const BLOQUES = [
   { t:'Bloque A: Datos sociodemográficos', items:[
-    {c:'D1', t:'Universidad en la que está matriculado', k:'text'},
-    {c:'D2', t:'Tipo de institución', k:'choice', s:['Pública','Privada','Régimen especial']},
-    {c:'D3', t:'Carrera o programa que cursa', k:'text'},
+    {c:'D1', t:'Universidad en la que está matriculado', k:'select', s:['UPDS','UPSA','UAGRM','UPB']},
+    {c:'D2', t:'Tipo de institución', k:'choice', s:['Pública','Privada']},
+    {c:'D3', t:'Carrera o programa que cursa', k:'select', s:['Bioquímica y Farmacia','Fisioterapia y Kinesiología','Medicina','Nutrición y Dietética','Administración de Empresas','Contaduría Pública','Ingeniería Comercial','Marketing y Publicidad','Derecho','Ciencias de la Comunicación Social','Psicología','Psicopedagogía','Relaciones Internacionales','Ingeniería Industrial','Ingeniería de Sistemas','Ingeniería en Redes y Telecomunicaciones']},
     {c:'D4', t:'Nivel de estudios', k:'choice', s:['Pregrado','Posgrado (especialidad, maestría o doctorado)']},
-    {c:'D5', t:'Año o semestre que cursa actualmente', k:'text'},
-    {c:'D6', t:'Edad en años cumplidos', k:'number', hint:'Población objetivo: estudiantes de 18 años o más.'},
+    {c:'D5', t:'Semestre que cursa actualmente', k:'text'},
+    {c:'D6', t:'Edad', k:'number'},
     {c:'D7', t:'Sexo o identidad de género', k:'choice', s:['Mujer','Hombre','Otra identidad','Prefiero no responder']},
     {c:'D8', t:'Ciudad en la que reside habitualmente', k:'text'},
     {c:'D9', t:'Lengua materna', k:'choice', s:['Castellano','Quechua','Aymara','Guaraní','Otra lengua indígena (especifique)','Otra (especifique)'], spec:[4,5]},
@@ -177,7 +179,7 @@ const BLOQUES = [
   { t:'Dimensión I: Legitimidad de la Constitución Política del Estado', intro:'En cada ítem, marque la opción que mejor describa su posición.', items:[
     {c:'P1', t:'El Órgano Ejecutivo cumple lo que establece la Constitución Política del Estado.', k:'scale', s:LIK},
     {c:'P2', t:'La Asamblea Legislativa Plurinacional legisla respetando la Constitución.', k:'scale', s:LIK},
-    {c:'P3', t:'Los órganos judiciales resuelven conforme a la Constitución y no según intereses políticos.', k:'scale', s:LIK},
+    {c:'P3', t:'Los órganos judiciales emiten decisiones conforme a la Constitución y no según intereses políticos.', k:'scale', s:LIK},
     {c:'P4', t:'Las políticas públicas que se aplican en Bolivia son coherentes con la Constitución de 2009.', k:'scale', s:LIK},
     {c:'P5', t:'En mi vida cotidiana percibo que la Constitución tiene efectos concretos.', k:'scale', s:LIK},
     {c:'P6', t:'Las autoridades invocan la Constitución para justificar decisiones ya tomadas, más que para orientar sus actos.', k:'scale', s:LIK}
@@ -188,7 +190,7 @@ const BLOQUES = [
     {c:'P9', t:'El TCP actúa con independencia frente al Órgano Ejecutivo.', k:'scale', s:LIK},
     {c:'P10', t:'El TCP protege eficazmente los derechos fundamentales de las personas.', k:'scale', s:LIK},
     {c:'P11', t:'El proceso de preselección en la Asamblea Legislativa Plurinacional y la elección popular de magistrados garantizan la independencia del TCP.', k:'scale', s:LIK},
-    {c:'C3', t:'El TCP resuelve influido por el poder político.', k:'scale', s:LIK}
+    {c:'C3', t:'El TCP emite decisiones influido por el poder político.', k:'scale', s:LIK}
   ]},
   { t:'Dimensión III: Acceso a la justicia constitucional', items:[
     {c:'P12', t:'Indique si conoce cada una de las siguientes acciones de defensa reconocidas por la Constitución.', k:'yn', rows:['Acción de libertad','Acción de amparo constitucional','Acción popular','Acción de cumplimiento','Acción de protección de privacidad','Acción de inconstitucionalidad'], s:['Sí','No']},
@@ -297,11 +299,17 @@ function renderQ(it, n){
       q.append(h('div', {class:'endpoints'}, h('span', {}, it.e[0]), h('span', {}, it.e[1])));
       it.rows.forEach((r,i) => {
         const code = it.c + String.fromCharCode(97+i);
-        const c = h('div', {class:'scale', style:`--n:${it.s.length}`});
+        const c = h('div', {class:'scale5'});
         it.s.forEach(l => c.append(opt(code, 'radio', l, l)));
         q.append(h('div', {class:'row'}, h('div', {class:'rl'}, r), c));
       });
       break;
+    }
+    case 'select': {
+      const sel = h('select', {name: it.c, 'aria-label': it.t});
+      sel.append(h('option', {value: ''}, 'Seleccione una opción'));
+      it.s.forEach(l => sel.append(h('option', {value: l}, l)));
+      q.append(sel); break;
     }
     case 'text':
       q.append(h('input', {type:'text', name:it.c, 'aria-label':it.t})); break;
@@ -326,7 +334,7 @@ $('#ptxt').textContent = `Respondidas 0 de ${TOTAL} preguntas`;
 
 // A question is answered when every field in it has a value; a visible "especifique" box must be filled too
 function qAnswered(q){
-  const names = new Set([...q.querySelectorAll('input:not(.spec), textarea')].map(i => i.name));
+  const names = new Set([...q.querySelectorAll('input:not(.spec), textarea, select')].map(i => i.name));
   let ok = names.size > 0;
   names.forEach(name => {
     const els = q.querySelectorAll(`[name="${name}"]`);
